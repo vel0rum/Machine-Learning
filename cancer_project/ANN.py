@@ -16,7 +16,7 @@ def import_local_data(file_path):
     raw_df = pd.read_csv(file_path)
     return raw_df
 
-local_file_path = 'breast-cancer.csv'
+local_file_path = 'nan.csv'
 raw_data = import_local_data(local_file_path)
 
 """
@@ -36,7 +36,7 @@ deg-malig is either 1, 2, or 3.
 
 breast is either left or right.
 
-breast-quad is split into five categories with one entry as a '?'. The value of left_low + left_up is much greater than the total number of 'lefts' in the breast column. Potentially erronious data?
+breast-quad is split into five categories with one entry as a '?'.
 
 irradiat is either yes or no.
 
@@ -45,25 +45,59 @@ The dependent variable is either recurrence-events or no-recurrence-events.
 
 """
 
+# Taking care of missing data
+print(raw_data.shape)
+raw_data = raw_data.dropna(how='any')
+print(raw_data.shape)
 
-X = dataset.iloc[:, 3:-1].values
-y = dataset.iloc[:, -1].values
+# Splitting into features and independent variable
+X = raw_data.iloc[:, :-1].values
+y = raw_data.iloc[:, -1].values
+
 print(X)
-print(y)
 
 # Encoding categorical data
-# Label Encoding the "Gender" column
 from sklearn.preprocessing import LabelEncoder
-le = LabelEncoder()
-X[:, 2] = le.fit_transform(X[:, 2])
-print(X)
-# One Hot Encoding the "Geography" column
-from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
-ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [1])], remainder='passthrough')
-X = np.array(ct.fit_transform(X))
+from sklearn.compose import ColumnTransformer
+
+# Label encoding the "age" column
+le_age = LabelEncoder()
+X[:, 0] = le_age.fit_transform(X[:, 0])
+
+# Label encoding the "menopause" column
+le_menopause = LabelEncoder()
+X[:, 1] = le_menopause.fit_transform(X[:, 1])
+
+# Label encoding the "tumor-size" column
+le_tumor_size = LabelEncoder()
+X[:, 2] = le_tumor_size.fit_transform(X[:, 2])
+
+# Label encoding the "inv-nodes" column
+le_inv_nodes = LabelEncoder()
+X[:, 3] = le_inv_nodes.fit_transform(X[:, 3])
+
+# Label encoding the "node-caps" column
+le_node_caps = LabelEncoder()
+X[:, 4] = le_node_caps.fit_transform(X[:, 4])
+
+# Do not need to encode "deg-malig" column
+
+# Label encoding the "breast" column
+le_breast = LabelEncoder()
+X[:, 6] = le_breast.fit_transform(X[:, 6])
+
+# Label encoding the "irradiant" column
+le_irradiant = LabelEncoder()
+X[:, 8] = le_irradiant.fit_transform(X[:, 8])
+
+# One Hot Encoding the "breast-quad" column
+ct_breast_quad = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [7])], remainder='passthrough')
+X = np.array(ct_breast_quad.fit_transform(X))
+
 print(X)
 
+"""
 # Splitting the dataset into the Training set and Test set
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
@@ -100,31 +134,7 @@ ann.fit(X_train, y_train, batch_size = 32, epochs = 100)
 
 # Predicting the result of a single observation
 
-"""
-Homework:
-Use our ANN model to predict if the customer with the following informations will leave the bank: 
-Geography: France
-Credit Score: 600
-Gender: Male
-Age: 40 years old
-Tenure: 3 years
-Balance: $ 60000
-Number of Products: 2
-Does this customer have a credit card? Yes
-Is this customer an Active Member: Yes
-Estimated Salary: $ 50000
-So, should we say goodbye to that customer?
-
-Solution:
-"""
-
 print(ann.predict(sc.transform([[1, 0, 0, 600, 1, 40, 3, 60000, 2, 1, 1, 50000]])) > 0.5)
-
-"""
-Therefore, our ANN model predicts that this customer stays in the bank!
-Important note 1: Notice that the values of the features were all input in a double pair of square brackets. That's because the "predict" method always expects a 2D array as the format of its inputs. And putting our values into a double pair of square brackets makes the input exactly a 2D array.
-Important note 2: Notice also that the "France" country was not input as a string in the last column but as "1, 0, 0" in the first three columns. That's because of course the predict method expects the one-hot-encoded values of the state, and as we see in the first row of the matrix of features X, "France" was encoded as "1, 0, 0". And be careful to include these values in the first three columns, because the dummy variables are always created in the first columns.
-"""
 
 # Predicting the Test set results
 y_pred = ann.predict(X_test)
@@ -136,3 +146,4 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 cm = confusion_matrix(y_test, y_pred)
 print(cm)
 print(accuracy_score(y_test, y_pred))
+"""
