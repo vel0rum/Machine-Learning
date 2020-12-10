@@ -49,12 +49,16 @@ The dependent variable is either recurrence-events or no-recurrence-events.
 print(raw_data.shape)
 raw_data = raw_data.dropna(how='any')
 print(raw_data.shape)
+print(raw_data.dtypes)
 
 # Splitting into features and independent variable
 X = raw_data.iloc[:, :-1].values
 y = raw_data.iloc[:, -1].values
 
-print(X)
+# Splitting the dataset into the Training set and Test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
+
 
 # Encoding categorical data
 from sklearn.preprocessing import LabelEncoder
@@ -97,10 +101,6 @@ X = np.array(ct_breast_quad.fit_transform(X))
 
 print(X)
 
-"""
-# Splitting the dataset into the Training set and Test set
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
 
 # Feature Scaling
 from sklearn.preprocessing import StandardScaler
